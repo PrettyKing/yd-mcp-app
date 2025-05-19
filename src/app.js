@@ -2,6 +2,7 @@ const Koa = require('koa');
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const logger = require('koa-logger');
+const apiRoutes = require('./routes');
 
 // 创建Koa应用实例
 const app = new Koa();
@@ -30,7 +31,10 @@ router.get('/health', async (ctx) => {
   };
 });
 
-// 使用路由中间件
+// 使用API路由
+app.use(apiRoutes.routes()).use(apiRoutes.allowedMethods());
+
+// 使用基本路由中间件
 app.use(router.routes()).use(router.allowedMethods());
 
 // 错误处理

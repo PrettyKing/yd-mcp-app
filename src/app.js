@@ -3,15 +3,20 @@ const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const logger = require('koa-logger');
 const apiRoutes = require('./routes');
+const config = require('./config');
+const middleware = require('./middleware');
 
 // 创建Koa应用实例
 const app = new Koa();
 const router = new Router();
 
 // 配置端口
-const PORT = process.env.PORT || 3000;
+const PORT = config.port || 3000;
 
-// 使用中间件
+// 使用全局中间件
+app.use(middleware.errorHandler);
+app.use(middleware.requestTime);
+app.use(middleware.cors);
 app.use(bodyParser());
 app.use(logger());
 
@@ -19,7 +24,8 @@ app.use(logger());
 router.get('/', async (ctx) => {
   ctx.body = {
     status: 'success',
-    message: 'Welcome to YD MCP Application API'
+    message: 'Welcome to YD MCP Application API',
+    environment: process.env.NODE_ENV || 'development'
   };
 });
 
@@ -27,7 +33,8 @@ router.get('/', async (ctx) => {
 router.get('/health', async (ctx) => {
   ctx.body = {
     status: 'up',
-    timestamp: new Date()
+    timestamp: new Date(),
+    version: process.env.npm_package_version || '1.0.0'
   };
 });
 
@@ -44,7 +51,7 @@ app.on('error', (err, ctx) => {
 
 // 启动服务器
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });
 
 module.exports = app;
